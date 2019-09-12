@@ -9,6 +9,7 @@ from database import *
 # bot init
 bot = telebot.TeleBot(config.TELEGRAM_API)
 
+
 # Обычный режим
 def create_markup():
     markup = types.ReplyKeyboardMarkup(row_width=3)
@@ -39,6 +40,7 @@ def validate_date(date=None):
             except:
                 req_date = 'err'
     return req_date
+
 
 @bot.message_handler(commands=['send'])
 def send_text(message):
@@ -83,7 +85,6 @@ def menu_text(message, params=None):
         bot.send_message(message.chat.id, "Введите свою группу, например: ПИ1-1", reply_markup=markup)
 
 
-
 @bot.message_handler(commands=['now'])
 def now_text(message, params=None):
     inline_mode = True if params is not None else False
@@ -95,7 +96,6 @@ def now_text(message, params=None):
     else:
         markup = types.ForceReply(selective=False)
         bot.send_message(message.chat.id, "Введите свою группу, например: ПИ1-1", reply_markup=markup)
-
 
 
 @bot.message_handler(commands=['today'])
@@ -112,7 +112,6 @@ def today_text(message, params=None):
     else:
         markup = types.ForceReply(selective=False)
         bot.send_message(message.chat.id, "Введите свою группу, например: ПИ1-1", reply_markup=markup)
-
 
 
 @bot.message_handler(commands=['setting'])
@@ -143,7 +142,6 @@ def next_text(message, params=None):
     else:
         markup = types.ForceReply(selective=False)
         bot.send_message(message.chat.id, "Введите свою группу, например: ПИ1-1", reply_markup=markup)
-
 
 
 @bot.message_handler(commands=['help'])
@@ -194,7 +192,6 @@ def week_text(message, params=None):
         bot.send_message(message.chat.id, "Введите свою группу, например: ПИ1-1", reply_markup=markup)
 
 
-
 @bot.message_handler(commands=['2week'])
 def twoweek_text(message, params=None):
     inline_mode = True if params is not None else False
@@ -224,7 +221,6 @@ def twoweek_text(message, params=None):
         bot.send_message(message.chat.id, "Введите свою группу, например: ПИ1-1", reply_markup=markup)
 
 
-
 @bot.message_handler(commands=['exam'])
 def exam_text(message, params=None):
     inline_mode = True if params is not None else False
@@ -240,7 +236,6 @@ def exam_text(message, params=None):
     else:
         markup = types.ForceReply(selective=False)
         bot.send_message(message.chat.id, "Введите свою группу, например: ПИ1-1", reply_markup=markup, parse_mode='html')
-
 
 
 @bot.message_handler(commands=['stat'])
@@ -297,7 +292,6 @@ def about_text(message, params=None):
         bot.send_message(message.chat.id, "Введите свою группу, например: ПИ1-1", reply_markup=markup)
 
 
-
 @bot.message_handler(commands=['group', 'g'])
 def group_text(message, params=None):
     inline_mode = True if params is not None else False
@@ -330,7 +324,6 @@ def group_text(message, params=None):
                                                           callback_data="Группа__{0}".format(group_nm))
                 keyboard1.add(callback_button2)
             bot.send_message(message.chat.id, "Ранее вводили:", reply_markup=keyboard1)
-
 
 
 @bot.message_handler(commands=['fac', 'start'])
@@ -409,7 +402,6 @@ def handle_text(message):
             bot.send_message(message.chat.id, 'Ошибка ввода даты!\n Попробуй так: 5.9 или так: 05.09.2016')
 
 
-
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
     if call.message:
@@ -417,9 +409,6 @@ def callback_inline(call):
         call_command = params_list[0] if params_list else None
         if bot_func.get(call_command):
             bot_func[call_command](call.message, params_list)
-
-
-
 
 
 lock = threading.Lock()

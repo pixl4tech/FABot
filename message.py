@@ -1,6 +1,7 @@
 from database import *
 import common
 import datetime
+import statictics
 
 """
 Модуль функций возврата расписания в виде текстовых сообщений (telegram)
@@ -100,3 +101,58 @@ def get_exams(group_id=None):
     else:
         return ['Информация о зачетах и экзаменах не найдена.']
 
+
+def get_statistics(user_id):
+    today = datetime.datetime.today()
+    new_users = statictics.new_users_per_day(today)
+    count_all = statictics.users_count()
+    req_yesterday_count = statictics.requets_per_day(today-datetime.timedelta(days=1))
+    req_count = statictics.requets_per_day(today)
+    uniq_users = statictics.users_per_day(today) if user_id == config.ADMIN_USER_ID else None
+
+    message = """**** Пользователи ****\nОбщее кол-во пользователей: {0}\nНовые за сегодня: {1}\n""".format(count_all,
+                                                                                                            new_users)
+    if uniq_users:
+        message += """Уникальные посетители: {0}\n""".format(uniq_users)
+    message += """\n**** Запросы ****\nПросмотров сегодня: {0}\nПросмотров вчера: {1}""".format(req_count,
+                                                                                                 req_yesterday_count)
+    return message
+
+
+def get_stat_requests(user_id):
+    if user_id == config.ADMIN_USER_ID:
+        req_list = statictics.requets_print()
+        mess_list = []
+        mess_txt = '*** Кол-во запросов по юзерам: ***\n'
+        for r in req_list:
+            iter_mess = '{icon} [ID: {user_id}, Кол-во: {count}, Ник: {user_name}, Имя: {user_first}, Фамилия: {user_last}]\n'.format(
+                **r, icon=config.EMODJI.get('alien'))
+            if len(mess_txt + iter_mess) > 4080:
+                mess_list.append(mess_txt)
+                mess_txt = iter_mess
+            else:
+                mess_txt += iter_mess
+            # Добавляем завершающие 16 символов
+        mess_txt += "***************"
+        mess_list.append(mess_txt)
+        return mess_list
+    else:
+        return ['Нет доступа']
+
+
+def get_stat_fac():
+    req_list = statictics.fac_users()
+    mess_list = []
+    mess_txt = '*** <b>Кол-во юзеров по факультетам:</b> ***\n'
+    for r in req_list:
+        iter_mess = '{icon} [{faculty_desc}, Кол-во: {count}]\n'.format(
+            **r, icon=config.EMODJI.get('pin'))
+        if len(mess_txt + iter_mess) > 4080:
+            mess_list.append(mess_txt)
+            mess_txt = iter_mess
+        else:
+            mess_txt += iter_mess
+        # Добавляем завершающие 16 символов
+    mess_txt += "***************"
+    mess_list.append(mess_txt)
+    return mess_list

@@ -1,3 +1,9 @@
+CREATE SEQUENCE public.request_log_request_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    CACHE 1;
 
 CREATE SEQUENCE public.schedule_id_row_seq
     INCREMENT 1
@@ -136,3 +142,71 @@ CREATE TABLE public.week_type
     week_desc character varying(20),
     CONSTRAINT week_type_pkey PRIMARY KEY (week_id)
 );
+
+-- Table: public.request_log
+
+CREATE TABLE public.request_log
+(
+    request_id integer NOT NULL DEFAULT nextval('request_log_request_id_seq'::regclass),
+    user_id character varying(20),
+    user_name character varying(150),
+    user_first character varying(150),
+    user_last character varying(150),
+    action_type character varying(64),
+    action_txt character varying(100),
+    mode_type character varying(4),
+    request_dt date,
+    request_dttm timestamp without time zone DEFAULT now(),
+    CONSTRAINT request_log_request_id_pk UNIQUE (request_id)
+);
+
+-- View: public.count_users
+
+CREATE OR REPLACE VIEW public.count_users AS
+ SELECT count(*) AS count
+   FROM "user";
+   
+-- View: public.user_req
+
+CREATE OR REPLACE VIEW public.user_req AS
+ SELECT count(request_log.request_id) AS count,
+    request_log.user_name,
+    request_log.user_id,
+    request_log.user_first,
+    request_log.user_last
+   FROM request_log
+  GROUP BY request_log.user_name, request_log.user_id, request_log.user_first, request_log.user_last;
+  
+-- View: public.user_requests
+
+CREATE OR REPLACE VIEW public.user_requests AS
+ SELECT count(request_log.request_id) AS count,
+    request_log.user_name,
+    request_log.user_id,
+    request_log.user_first,
+    request_log.user_last
+   FROM request_log
+  GROUP BY request_log.user_name, request_log.user_id, request_log.user_first, request_log.user_last
+  ORDER BY (count(request_log.request_id)) DESC;
+  
+-- View: public.users_stat
+
+CREATE OR REPLACE VIEW public.users_stat AS
+ SELECT a.user_group_name,
+    a.count,
+    sum(a.count) OVER () AS "all"
+   FROM ( SELECT "user".user_group_name,
+            count("user".user_id) AS count
+           FROM "user"
+          GROUP BY "user".user_group_name) a;
+		  
+-- View: public.uses_stats
+
+CREATE OR REPLACE VIEW public.uses_stats AS
+ SELECT a.user_group_name,
+    a.count,
+    sum(a.count) OVER () AS "all"
+   FROM ( SELECT "user".user_group_name,
+            count("user".user_group_name) AS count
+           FROM "user"
+          GROUP BY "user".user_group_name) a;
